@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive GIS Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; }
+        nav { background: #333; padding: 10px; }
+        nav a { color: white; padding: 10px; text-decoration: none; }
+        nav a:hover { background: #555; }
+        .container { width: 80%; margin: auto; padding: 20px; background: white; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
+        .header { padding: 20px; background: #444; color: white; }
+        #map { height: 600px; width: 100%; margin-top: 20px; }
+
+        /* Contour Labels */
+        .contour-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: black;
+            background: white;
+            padding: 2px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="map.html">Interactive Map</a>
+        <a href="data.html">Data & Analysis</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>Interactive GIS Map</h1>
+            <p>Toggle layers to explore Isle of Wight GIS data.</p>
+        </div>
+
+        <div id="map"></div>
+    </div>
+
+    <script>
+        var map = L.map('map').setView([50.6938, -1.3047], 10);  // Center on Isle of Wight
+
+        // Base Layer (OpenStreetMap)
+        var baseLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Placeholder for Future WMS Layers (e.g., Roads, Towns)
+        var roadsLayer = L.tileLayer.wms('https://your-geoserver-url/ows?', {
+            layers: 'roads',
+            format: 'image/png',
+            transparent: true
+        });
+
+        var townsLayer = L.tileLayer.wms('https://your-geoserver-url/ows?', {
+            layers: 'towns',
+            format: 'image/png',
+            transparent: true
+        });
+
+        // Rainfall Contours Layer
+        var rainfallContours = L.geoJSON(null, {
+            style: function (feature) {
+                return {
+                    color: "blue",  // Contour line color
+                    weight: 1.5,    // Thickness of contour lines
+                    opacity: 0.8    // Transparency
+                };
+            },
+            onEachFeature: function (feature, layer) {
+                if (feature.properties.Contour) {
+                    // Label always visible
+                    layer.bindTooltip(
+                        feature.properties.Contour + " mm",
+                        { permanent: true, direction: "center", className: "contour-label" }
+                    );
+
+                    // Popup on click
+                    layer.bindPopup("Rainfall: " + feature.properties.Contour + " mm");
+                }
+            }
+        });
+
+        // Smooth Rainfall Layer (Polygon)
+        var rainfallSmoothLayer = L.geoJSON(null, {
+            style: function (feature) {
+                return {
+                    fillColor: getColor(feature.properties.value), // Function to style by value
+                    color: "#000",
+                    weight: 0.5,
+                    fillOpacity: 0.6
+                };
+            }
+        });
+
+        // Function to determine color for smooth layer
+        function getColor(value) {
+            return value > 80 ? "#08306b" :
+                   value > 60 ? "#2171b5" :
+                   value > 40 ? "#6baed6" :
+                   value > 20 ? "#bdd7e7" :
+                   "#eff3ff";  // Lightest for lowest values
+        }
+
+        // Fetch and load the GeoJSON files
+        fetch('https://raw.githubusercontent.com/lilkuku/webmappingassignments453290/main/rainfall_contours_corrected.geojson')
+            .then(response => response.json())
+            .then(data => rainfallContours.addData(data))
+            .catch(error => console.error('Error loading Contours GeoJSON:', error));
+
+        fetch('https://raw.githubusercontent.com/lilkuku/webmappingassignments453290/main/RasterT_int_idw1_wgs84.geojson')
+            .then(response => response.json())
+            .then(data => rainfallSmoothLayer.addData(data))
+            .catch(error => console.error('Error loading Smooth Rainfall GeoJSON:', error));
+
+        // Grouped Rainfall Layer (Both Smooth & Contours)
+        var rainfallGroup = L.layerGroup([rainfallSmoothLayer, rainfallContours]);
+
+        // Layer Control Panel (Allows Toggling Layers)
+        var overlayMaps = {
+            "Roads": roadsLayer,  // Placeholder for future roads
+            "Towns": townsLayer,  // Placeholder for future towns
+            "Rainfall Data": rainfallGroup  // Both smooth and contour layers
+        };
+
+        L.control.layers(null, overlayMaps).addTo(map);
+
+    </script>
+
+</body>
+</html>
+
+

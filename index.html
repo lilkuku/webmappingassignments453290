@@ -42,10 +42,13 @@
         }).addTo(map);
 
         // Load GeoJSON Layers
-        function loadGeoJSON(url, style) {
-            return fetch(url)
+        function loadGeoJSON(url, style, callback) {
+            fetch(url)
                 .then(response => response.json())
-                .then(data => L.geoJSON(data, { style: style }));
+                .then(data => {
+                    var layer = L.geoJSON(data, { style: style });
+                    callback(layer);
+                });
         }
 
         var townLayer, roadLayer, rainfallContours;
@@ -53,18 +56,24 @@
         loadGeoJSON('towns.geojson', {
             color: "red",
             radius: 6
-        }).then(layer => townLayer = layer);
+        }, layer => {
+            townLayer = layer;
+        });
 
         Promise.all([
-            loadGeoJSON('iow_a_roads.geojson', { color: "black", weight: 2 }),
-            loadGeoJSON('iow_b_roads.geojson', { color: "black", weight: 1 })
-        ]).then(layers => roadLayer = L.layerGroup(layers));
+            loadGeoJSON('iow_a_roads.geojson', { color: "black", weight: 2 }, layer => layer),
+            loadGeoJSON('iow_b_roads.geojson', { color: "black", weight: 1 }, layer => layer)
+        ]).then(layers => {
+            roadLayer = L.layerGroup(layers);
+        });
 
         loadGeoJSON('rainfall_contours.geojson', {
             color: "blue",
             weight: 1.5,
             opacity: 0.8
-        }).then(layer => rainfallContours = layer);
+        }, layer => {
+            rainfallContours = layer;
+        });
 
         var rainfallOverlay = L.imageOverlay(
             'https://lilkuku.github.io/webmappingassignments453290/tiff_1.png', 
@@ -84,4 +93,3 @@
     </script>
 </body>
 </html>
-

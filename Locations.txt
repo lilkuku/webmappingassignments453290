@@ -1,0 +1,13 @@
+Filename,East,North
+AlumBay1.jpg,431129,85719
+AlumBay2.jpg,431115,85712
+AlumBay3.jpg,431180,85638
+AlumBay4.jpg,431184,85543
+IOWNeedles1.jpg,431910,85734
+StCatherinesErosion1.jpg,450628,75082
+StCatherinesErosion2.jpg,450589,75117
+StCatherinesSolifluction1.jpg,450547,75129
+StCatherinesSolifluction2.jpg,450528,75110
+VentnorErosion1.jpg,455582,76812
+VentnorErosion2.jpg,455234,76696
+VentnorErosion3.jpg,455053,76639

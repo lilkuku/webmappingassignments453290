@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Isle of Wight Web GIS</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.7.5/proj4.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; }
+        nav { background: #333; padding: 10px; }
+        nav a { color: white; padding: 10px; text-decoration: none; }
+        nav a:hover { background: #555; }
+        .container { width: 80%; margin: auto; padding: 20px; background: white; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
+        .header { padding: 20px; background: #444; color: white; }
+        #map { height: 500px; width: 100%; margin-top: 20px; }
+        .logo { height: 50px; float: left; margin-right: 15px; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="map.html">Interactive Map</a>
+        <a href="data.html">Data & Analysis</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+    
+    <div class="container">
+        <div class="header">
+            <img src="iow_council_logo.jpg" alt="Isle of Wight Logo" class="logo">
+            <h1>Welcome to the Isle of Wight Web GIS</h1>
+            <p>A prototype web mapping application</p>
+        </div>
+        
+        <h2>Interactive Map</h2>
+        <div id="map"></div>
+        
+        <p>This is a placeholder GIS map. Future features will include Isle of Wight data layers such as roads, rainfall, and town boundaries.</p>
+    </div>
+    
+    <script>
+        var map;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            if (map !== undefined) {
+                map.remove(); 
+            }
+
+            map = L.map('map').setView([50.6938, -1.3047], 10);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Define British National Grid (EPSG:27700) and WGS 84 (EPSG:4326) for conversion
+            proj4.defs("EPSG:27700","+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +datum=OSGB36 +units=m +no_defs");
+
+
+            var locations = [
+                { filename: 'AlumBay1.jpg', east: 431129, north: 85719, desc: 'Alum Bay - Beautiful cliffs and colored sands.' },
+                { filename: 'AlumBay2.jpg', east: 431115, north: 85712, desc: 'Alum Bay - Famous for its multi-colored sand cliffs.' },
+                { filename: 'AlumBay3.jpg', east: 431180, north: 85638, desc: 'Alum Bay - Tourist attraction with a great view.' },
+                { filename: 'AlumBay4.jpg', east: 431184, north: 85543, desc: 'Alum Bay - Close to the Needles lighthouse.' },
+                { filename: 'IMG_1575.JPG', east: 431910, north: 85734, desc: 'The Needles - Iconic chalk stacks off the Isle of Wight.' },
+                { filename: 'IMG_1590.JPG', east: 450628, north: 75082, desc: 'St. Catherine’s - Coastal erosion site.' },
+                { filename: 'IMG_1657.JPG', east: 450589, north: 75117, desc: 'St. Catherine’s - Evidence of long-term erosion.' },
+                { filename: 'IMG_1896.JPG', east: 450547, north: 75129, desc: 'St. Catherine’s - Soil movement due to freeze-thaw.' },
+                { filename: 'IMG_1906.JPG', east: 450528, north: 75110, desc: 'St. Catherine’s - Example of solifluction in action.' },
+                { filename: 'VentnorErosion1.jpg', east: 455582, north: 76812, desc: 'Ventnor - Active coastal erosion site.' },
+                { filename: 'VentnorErosion2.jpg', east: 455234, north: 76696, desc: 'Ventnor - Cliff instability and landslides.' },
+                { filename: 'VentnorErosion3.jpg', east: 455053, north: 76639, desc: 'Ventnor - Example of managed retreat.' }
+            ];
+
+            locations.forEach(function (loc) {
+                // Convert from EPSG:27700 (BNG) to EPSG:4326 (Lat/Lon)
+                var convertedCoords = proj4("EPSG:27700", "EPSG:4326", [loc.east, loc.north]);
+                var lat = convertedCoords[1]; // Latitude
+                var lon = convertedCoords[0]; // Longitude
+
+                var marker = L.circleMarker([lat, lon], {
+                    radius: 8,
+                    color: "black",
+                    fillColor: "black",
+                    fillOpacity: 1
+                }).addTo(map);
+
+                marker.bindPopup(`<b>${loc.desc}</b><br><img src='${loc.filename}' width='200'>`);
+            });
+        });
+    </script>
+</body>
+</html>

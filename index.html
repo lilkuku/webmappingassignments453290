@@ -61,8 +61,8 @@
         });
 
         Promise.all([
-            loadGeoJSON('iow_a_roads.geojson', { color: "black", weight: 2 }, layer => layer),
-            loadGeoJSON('iow_b_roads.geojson', { color: "black", weight: 1 }, layer => layer)
+            new Promise(resolve => loadGeoJSON('iow_a_roads.geojson', { color: "black", weight: 2 }, resolve)),
+            new Promise(resolve => loadGeoJSON('iow_b_roads.geojson', { color: "black", weight: 1 }, resolve))
         ]).then(layers => {
             roadLayer = L.layerGroup(layers);
         });

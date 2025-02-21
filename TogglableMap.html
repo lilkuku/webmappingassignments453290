@@ -43,12 +43,16 @@
 
         function loadGeoJSON(url, style, onEachFeature = null) {
             return fetch(url)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => L.geoJSON(data, { style: style, onEachFeature: onEachFeature }))
                 .catch(error => console.error("Error loading", url, error));
         }
 
-        // Add labels to contours and towns
         function addLabels(feature, layer) {
             if (feature.properties.Contour) {
                 layer.bindTooltip(

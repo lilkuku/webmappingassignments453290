@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>Isle of Wight - Soils ArcGIS Online Web Map</title>
+    <title>Isle of Wight - Soil Mapping</title>
 
     <!-- Styles -->
     <style>
@@ -13,6 +13,9 @@
             height: 100%;
             width: 100%;
         }
+        nav { background: #333; padding: 10px; text-align: center; }
+        nav a { color: white; padding: 10px; text-decoration: none; }
+        nav a:hover { background: #555; }
     </style>
 
     <!-- Load ArcGIS Styles & Scripts -->
@@ -24,13 +27,18 @@
 </head>
 
 <body>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="TogglableMap.html">Isle of Wight GIS Layers</a>
+        <a href="soilmapping.html">Soil Mapping</a>
+        <a href="about.html">About</a>
+    </nav>
 
     <!-- ArcGIS Online Web Map -->
-    <h2 style="text-align: center;">Isle of Wight - Soils ArcGIS Online Web Map</h2>
+    <h2 style="text-align: center;">Isle of Wight - Soil Mapping</h2>
     <arcgis-map item-id="6dd6de84899941ccb32a2f30cdcea672">
         <arcgis-zoom position="top-left"></arcgis-zoom>
         <arcgis-legend position="bottom-right"></arcgis-legend>
     </arcgis-map>
-
 </body>
 </html>

@@ -15,9 +15,31 @@
         .container { width: 80%; margin: auto; padding: 20px; background: white; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
         .header { padding: 20px; background: #444; color: white; }
         #map { height: 600px; width: 100%; margin-top: 20px; }
+
+        /* Contour Labels */
+        .contour-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: black;
+            background: white;
+            padding: 2px;
+            border-radius: 3px;
+        }
+
+        /* Pulsing effect for the toggle icon */
+        .leaflet-control-layers-toggle {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 <body>
+
     <nav>
         <a href="index.html">Home</a>
         <a href="map.html">Interactive Map</a>
@@ -41,55 +63,54 @@
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        // Load GeoJSON Layers
-        function loadGeoJSON(url, style, callback) {
-            fetch(url)
+        function loadGeoJSON(url, style, onEachFeature = null) {
+            return fetch(url)
                 .then(response => response.json())
-                .then(data => {
-                    var layer = L.geoJSON(data, { style: style });
-                    callback(layer);
-                });
+                .then(data => L.geoJSON(data, { style: style, onEachFeature: onEachFeature }))
+                .catch(error => console.error("Error loading", url, error));
         }
 
-        var townLayer, roadLayer, rainfallContours;
-
-        loadGeoJSON('towns.geojson', {
-            color: "red",
-            radius: 6
-        }, layer => {
-            townLayer = layer;
-        });
+        // Add labels to contours and towns
+        function addLabels(feature, layer) {
+            if (feature.properties.Contour) {
+                layer.bindTooltip(
+                    feature.properties.Contour + " mm",
+                    { permanent: true, direction: "center", className: "contour-label" }
+                );
+                layer.bindPopup("Rainfall: " + feature.properties.Contour + " mm");
+            }
+            if (feature.properties.Population) {
+                layer.bindPopup("Population: " + feature.properties.Population);
+            }
+        }
 
         Promise.all([
-            new Promise(resolve => loadGeoJSON('iow_a_roads.geojson', { color: "black", weight: 2 }, resolve)),
-            new Promise(resolve => loadGeoJSON('iow_b_roads.geojson', { color: "black", weight: 1 }, resolve))
-        ]).then(layers => {
-            roadLayer = L.layerGroup(layers);
+            loadGeoJSON('https://raw.githubusercontent.com/lilkuku/webmappingassignments453290/main/towns.geojson', { color: "red" }, addLabels),
+            loadGeoJSON('https://raw.githubusercontent.com/lilkuku/webmappingassignments453290/main/iow_a_roads.geojson', { color: "blue", weight: 2 }),
+            loadGeoJSON('https://raw.githubusercontent.com/lilkuku/webmappingassignments453290/main/iow_b_roads.geojson', { color: "purple", weight: 1.5 }),
+            loadGeoJSON('https://raw.githubusercontent.com/lilkuku/webmappingassignments453290/main/rainfall_contours_corrected.geojson', { color: "blue", weight: 1.5, opacity: 0.8 }, addLabels),
+            loadGeoJSON('https://raw.githubusercontent.com/lilkuku/webmappingassignments453290/main/iowislandoutline.geojson', { color: "black", weight: 2 })
+        ]).then(([townLayer, aRoadsLayer, bRoadsLayer, rainfallContours, islandOutline]) => {
+
+            var roadLayer = L.layerGroup([aRoadsLayer, bRoadsLayer]);
+
+            var rainfallOverlay = L.imageOverlay(
+                'https://raw.githubusercontent.com/lilkuku/webmappingassignments453290/main/tiff_1.png',
+                [[50.82, -1.57], [50.55, -1.09]],
+                { opacity: 0.6 }
+            );
+
+            var overlayMaps = {
+                "Towns & Population": townLayer,
+                "A Roads (Blue) & B Roads (Purple)": roadLayer,
+                "Island Boundary": islandOutline,
+                "Rainfall Data": L.layerGroup([rainfallContours, rainfallOverlay])
+            };
+
+            L.control.layers(null, overlayMaps).addTo(map);
         });
 
-        loadGeoJSON('rainfall_contours.geojson', {
-            color: "blue",
-            weight: 1.5,
-            opacity: 0.8
-        }, layer => {
-            rainfallContours = layer;
-        });
-
-        var rainfallOverlay = L.imageOverlay(
-            'https://lilkuku.github.io/webmappingassignments453290/tiff_1.png', 
-            [[50.82, -1.57], [50.55, -1.09]],
-            { opacity: 0.6 }
-        );
-
-        // Layer Control
-        var overlayMaps = {
-            "Towns & Population": townLayer,
-            "Road Network": roadLayer,
-            "Rainfall Contours": rainfallContours,
-            "Rainfall Intensity": rainfallOverlay
-        };
-
-        L.control.layers(null, overlayMaps).addTo(map);
     </script>
+
 </body>
 </html>

@@ -9,43 +9,21 @@
 
     <style>
         body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; }
-        nav { background: #333; padding: 10px; }
+        nav { background: #333; padding: 10px; text-align: center; }
         nav a { color: white; padding: 10px; text-decoration: none; }
         nav a:hover { background: #555; }
         .container { width: 80%; margin: auto; padding: 20px; background: white; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
         .header { padding: 20px; background: #444; color: white; }
         #map { height: 600px; width: 100%; margin-top: 20px; }
-
-        /* Contour Labels */
-        .contour-label {
-            font-size: 12px;
-            font-weight: bold;
-            color: black;
-            background: white;
-            padding: 2px;
-            border-radius: 3px;
-        }
-
-        /* Pulsing effect for the toggle icon */
-        .leaflet-control-layers-toggle {
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
     </style>
 </head>
 <body>
 
     <nav>
         <a href="index.html">Home</a>
-        <a href="map.html">Interactive Map</a>
-        <a href="data.html">Data & Analysis</a>
+        <a href="TogglableMap.html">Isle of Wight GIS Layers</a>
+        <a href="soilmapping.html">Soil Mapping</a>
         <a href="about.html">About</a>
-        <a href="contact.html">Contact</a>
     </nav>
 
     <div class="container">
